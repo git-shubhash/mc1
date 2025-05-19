@@ -1,0 +1,200 @@
+prg 01
+AREA MULT, CODE, READONLY
+ENTRY
+	LDR R1,=ARR
+	LDR R2,[R1]
+	ADD R1,#2
+	LDR R3,[R1]
+	MUL R4,R2,R3
+	LDR R5,=RESULT
+	STR R4,[R5]
+STOP B STOP
+ARR DCW 2_1010,2_10
+	AREA DATA1, DATA,READWRITE
+RESULT DCD 0X0
+	END
+
+
+
+
+prg 02
+AREA ADDITION, CODE, READONLY
+ENTRY
+START
+            MOV R0 , #10
+            MOV R1 , #0
+            MOV R2, #1
+NEXT ADD R1,R1,R2
+            ADD R2, #1
+            SUBS  R0,#1
+            BNE NEXT
+STOP
+	NOP
+	END
+
+
+
+
+prg 03
+AREA FACT, CODE, READONLY
+START
+	MOV R0,#5
+	MOV R1, #1
+	CMP R0, #0
+	BEQ STOP
+	MOV R1, R0
+NEXT SUBS R0, #1
+	CMP R0, #0
+BEQ STOP
+	MUL R2,R1,R0
+        MOV R1,R2
+	B NEXT
+STOP
+	NOP
+        END
+
+
+
+
+prg 04
+AREA ADDITION, CODE, READONLY
+          ENTRY
+START
+         LDR R0,=ARRAY
+         LDR R5,=SUM
+         MOV R1,#0
+         MOV R4,#0
+NEXT CMP R1,#10
+        BEQ STORE
+        LDRH R3,[R0],#2
+        ADC R4,R4,R3
+       ADD R1,R1,#1
+LOOP B NEXT
+STORE STR R4,[R5]
+STOP B STOP
+       AREA DATASEG1, DATA, READONLY
+ARRAY DCW 0x0011,0x0022,0x0033,0x0044,0x0055,0x0066,0x0077,0x0088,0x0099,0x00AA
+ALIGN
+AREA DATASEG2, DATA
+SUM DCD 0
+END
+
+
+
+prg 05
+ area square, code, readonly
+entry				                                                  
+start
+    ldr r0,=table1		                                  
+    ldr r1,=7	                                
+    mov r1,r1,lsl#0x2	                           
+    add r0,r0,r1		                                         
+    ldr r3,[r0]		                   
+xss      b xss
+table1 DCD 0X00000000                         
+      DCD 0X00000001
+      DCD 0X00000004
+      DCD 0X00000009
+      DCD 0X00000010
+      DCD 0X00000019
+      DCD 0X00000024
+      DCD 0X00000031
+      DCD 0X00000040
+      DCD 0X00000051
+      DCD 0X00000064;	
+  area data1,data,readwrite
+result               DCD 0X00000000
+  end	
+	
+
+
+
+prg 06
+  AREA LARGEST, CODE, READONLY
+    ENTRY
+START MOV R5,#6
+      LDR R1,=VALUE1
+      LDR R2,[R1],#4
+LOOP LDR R4,[R1],#4
+     CMP R2,R4
+     BHI LOOP1
+     MOV R2,R4
+LOOP1 SUBS R5,R5,#1
+      CMP R5,#0
+      BNE LOOP
+      LDR R4,=RESULT
+      STR R2,[R4]
+XSS B XSS
+VALUE1 DCD 0X44444444
+       DCD 0X22222222
+       DCD 0X11111111
+       DCD 0X33333333
+       DCD 0XAAAAAAAA
+       DCD 0X88888888
+       DCD 0X99999999
+   AREA DATA1,DATA,READWRITE
+RESULT DCD 0X00000000
+           END
+
+
+
+prg 07
+#include<lpc214x.h>
+void uart_init(void);
+unsigned int delay;
+unsigned char *ptr;
+unsigned char arr[]="HELLO WORLD\r";
+int main()
+{
+  while(1)
+  {
+     uart_init();
+     ptr = arr;
+     while(*ptr!='\0')
+     {
+        U0THR=*ptr++;
+        while(!(U0LSR & 0x20)== 0x20);
+        for(delay=0;delay<=600;delay++);
+     }
+     for(delay=0;delay<=60000;delay++);
+   }
+}
+void uart_init(void)
+{
+ PINSEL0=0X0000005; //select TXD0 and RXD0 lines 
+ U0LCR = 0X00000083; //enable baud rate divisor loading and
+ U0DLM = 0X00; //select the data format
+ U0DLL = 0x13; //select baud rate 9600 bps
+ U0LCR = 0X00000003;
+}
+
+
+
+
+prg 08
+#include <LPC214X.h>
+void delay();
+void delay() // Delay Routine
+{
+ int i,j;
+ for(i=0;i<0xff;i++)
+ for(j=0;j<0x25;j++);
+}
+int main()
+{
+ 
+ IO0DIR=0x000F0000; //Port selection
+ while(1)
+ { // Anticlock wise rotation.
+ 
+IO0PIN=0x00080000; //For Clkwise send 1,2,4,8 instead of 8,4,2,1
+delay();
+IO0PIN=0x00040000;
+delay();
+IO0PIN=0x00020000;
+delay();
+IO0PIN=0x00010000;
+delay();
+ 
+}
+}
